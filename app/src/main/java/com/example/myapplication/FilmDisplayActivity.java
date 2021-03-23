@@ -31,8 +31,6 @@ public class FilmDisplayActivity extends AppCompatActivity {
     TextView textFilmLayoutWriter;
     TextView textFilmLayoutLanguage;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,14 +52,8 @@ public class FilmDisplayActivity extends AppCompatActivity {
         try {
 
             JSONObject json = new JSONObject(intent.getStringExtra("json"));
-            /*if (intent.getByteArrayExtra("ByteArray") != null) {
-                byte[] array = intent.getByteArrayExtra("ByteArray");
-                Bitmap poster = BitmapFactory.decodeByteArray(array, 0, array.length);
-                imageViewFilmLayout.setImageBitmap(poster);
-            }*/
 
             Glide.with(this).load(json.get("Poster").toString()).into(imageViewFilmLayout);
-
 
             textFilmLayoutDirector.setText(json.get("Director").toString());
             textFilmLayoutCast.setText(json.get("Actors").toString());
