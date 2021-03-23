@@ -11,10 +11,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.view.textclassifier.TextLinks;
+import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -30,6 +33,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import okhttp3.Request;
 
@@ -46,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_film);
 
-
         l = new LinearLayout(this);
         l.setOrientation(LinearLayout.VERTICAL);
 
@@ -54,57 +58,101 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         EditText txt = findViewById(R.id.editText);
 
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
+        LinearLayoutManager layout = new LinearLayoutManager(MainActivity.this);
+        recyclerView.setLayoutManager(layout);
+        Log.d("testmsg", "juste pour voir");
+
         btn.setOnClickListener(v -> {
             String title = txt.getText().toString();
-            AsyncTaskOmdb asyncTaskOmdb = new AsyncTaskOmdb();
-            asyncTaskOmdb.execute(title);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            ProgressDialog p = new ProgressDialog(this);
+            p.setMessage("please wait");
+            p.setIndeterminate(false);
+            p.setCancelable(false);
+            p.show();
+            executor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    Log.d("MSF", "this a thread message");
+                    OmdbApiSearch o = new OmdbApiSearch(title, getResources().getString(R.string.ApiKey));
+                    try {
+                        JSONArray listJson = o.getMovies();
+                        movieData = new ArrayList<>();
+
+                        for (int i = 0; i<listJson.length(); i++) {
+                            movieData.add(new MovieData((JSONObject) listJson.get(i)));
+                        }
+
+                        MovieAdapter adapter = new MovieAdapter(MainActivity.this, movieData, MainActivity.this);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                recyclerView.setAdapter(adapter);
+
+                                p.hide();
+                            }
+                        });
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            //String title = txt.getText().toString();
+            //AsyncTaskOmdb asyncTaskOmdb = new AsyncTaskOmdb();
+            //asyncTaskOmdb.execute(title);
+
         });
     }
 
     @Override
     public void onItemClick(int position) {
-        Log.d("MSG","clicked on: " + movieData.get(position).title);
-        OmdbApiSearch o = new OmdbApiSearch(movieData.get(position).imdbID, "APIKEY");
+        Log.d("MSGTHREAD","clicked on: " + movieData.get(position).title);
+        /*OmdbApiSearch o = new OmdbApiSearch(movieData.get(position).imdbID, "63f3e471");
         AsyncTaskOmdbFilm asyncTaskOmdbFilm = new AsyncTaskOmdbFilm();
-        asyncTaskOmdbFilm.execute(o);
+        asyncTaskOmdbFilm.execute(o);*/
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                OmdbApiSearch o = new OmdbApiSearch(movieData.get(position).imdbID, getResources().getString(R.string.ApiKey));
+                JSONObject json = o.getMovie();
+                intent = new Intent(MainActivity.this, FilmDisplayActivity.class);
+                intent.putExtra("json", json.toString());
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(intent);
+                    }
+                });
 
-
+            }
+        });
     }
-
+/*
     private class AsyncTaskOmdbFilm extends AsyncTask<OmdbApiSearch, String, String> {
 
         ProgressDialog p;
 
         protected void onPreExecute() {
-            /*p = new ProgressDialog(MainActivity.this);
+            p = new ProgressDialog(MainActivity.this);
             p.setMessage("please wait");
             p.setIndeterminate(false);
             p.setCancelable(false);
-            p.show();*/
+            p.show();
         }
 
         @Override
         protected String doInBackground(OmdbApiSearch... omdb) {
-            try {
-                JSONObject json = omdb[0].getMovie();
-                intent = new Intent(MainActivity.this, FilmDisplayActivity.class);
-                intent.putExtra("json", json.toString());
-                //URL url = new URL(json.get("Poster").toString());
-                //Bitmap poster = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                //ByteArrayOutputStream b = new ByteArrayOutputStream();
-                //poster.compress(Bitmap.CompressFormat.JPEG, 50, b);
-                //intent.putExtra("ByteArray", b.toByteArray());
+            JSONObject json = omdb[0].getMovie();
+            intent = new Intent(MainActivity.this, FilmDisplayActivity.class);
+            intent.putExtra("json", json.toString());
 
-                return "";
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.d("MSG", "ERROR ERROR BYTEARRAY");
-                //intent.putExtra("ByteArray", (Bundle) null);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return null;
+            return "";
         }
 
         @Override
@@ -122,9 +170,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         @Override
         protected MovieAdapter doInBackground(String... strings) {
-            OmdbApiSearch o = new OmdbApiSearch(strings[0], "APIKEY");
+            OmdbApiSearch o = new OmdbApiSearch(strings[0], "63f3e471");
             try {
-                //ArrayList<JSONObject> listJson = o.getMovies();
                 JSONArray listJson = o.getMovies();
                 movieData = new ArrayList<>();
 
@@ -132,16 +179,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                     movieData.add(new MovieData((JSONObject) listJson.get(i)));
                 }
 
+                return new MovieAdapter(MainActivity.this, movieData, MainActivity.this);
 
-                /*for (JSONObject j : listJson) {
-                    movieData.add(new MovieData(j));
-                }*/
-
-                MovieAdapter adapter = new MovieAdapter(MainActivity.this, movieData, MainActivity.this);
-                return adapter;
-
-            } catch (IOException e) {
-                e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -162,11 +201,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
         @Override
         protected void onPostExecute(MovieAdapter adapter) {
             super.onPostExecute(adapter);
-            //String[] list = new String[s.size()];
-
-            /*for (int i = 0; i<s.size(); i++) {
-                list[i] = s.get(i);
-            }*/
 
             if (adapter==null) {
                 //Toast.makeText(MainActivity.this, "no movie found", Toast.LENGTH_LONG).show();
@@ -186,5 +220,5 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
 
         }
     }
-
+*/
 }

@@ -31,7 +31,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
     Context context;
     ArrayList<MovieData> movie;
-    private RecyclerViewClickInterface recyclerViewClickInterface;
+    private final RecyclerViewClickInterface recyclerViewClickInterface;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -45,12 +45,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             textViewTitle = itemView.findViewById(R.id.textViewTitle);
             textViewYear = itemView.findViewById(R.id.textViewYear);
             imageViewPoster = itemView.findViewById(R.id.imageViewPoster);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    recyclerViewClickInterface.onItemClick(getAdapterPosition());
-                }
-            });
+            itemView.setOnClickListener(v -> recyclerViewClickInterface.onItemClick(getAdapterPosition()));
 
         }
 
@@ -69,8 +64,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     public MovieAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(R.layout.recycler_list_item, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -95,7 +89,7 @@ class MovieData {
     public String imdbID;
     public String poster;
 
-    MovieData(JSONObject json) throws JSONException, IOException {
+    MovieData(JSONObject json) throws JSONException {
         prepareData(json);
 
     }

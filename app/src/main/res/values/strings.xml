@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">BusterThèque</string>
+    <string name="ApiKey">APIKEY</string>
 </resources>
