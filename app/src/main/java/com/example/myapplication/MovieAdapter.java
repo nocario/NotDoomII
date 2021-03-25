@@ -1,10 +1,7 @@
 package com.example.myapplication;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +17,7 @@ import com.bumptech.glide.Glide;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-
-import javax.microedition.khronos.opengles.GL;
 
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
@@ -71,7 +64,21 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull MovieAdapter.ViewHolder holder, int position) {
         holder.textViewTitle.setText(movie.get(position).title);
         holder.textViewYear.setText(movie.get(position).year);
-        Glide.with(context).load(movie.get(position).poster).into(holder.imageViewPoster);
+        //Glide.with(context).load(movie.get(position).poster)
+        //        .placeholder(R.drawable.ic_launcher_background).into(holder.imageViewPoster);
+
+        if (!movie.get(position).poster.equals("N/A")) {
+            Glide.with(context).load(movie.get(position).poster)
+                    .placeholder(R.drawable.ic_launcher_background).into(holder.imageViewPoster);
+        } else {
+            Glide.with(context).load(R.drawable.ic_launcher_background).into(holder.imageViewPoster);
+        }
+
+        /*if (!movie.get(position).poster.equals("N/A")) {
+            Log.d("msg", movie.get(position).poster);
+            Glide.with(context).load(movie.get(position).poster)
+                    .placeholder(R.drawable.ic_launcher_background).into(holder.imageViewPoster);
+        }*/
 
     }
 
