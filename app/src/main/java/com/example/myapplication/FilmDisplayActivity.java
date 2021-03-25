@@ -3,8 +3,6 @@ package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -14,8 +12,6 @@ import com.bumptech.glide.Glide;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.URL;
 
 public class FilmDisplayActivity extends AppCompatActivity {
 
@@ -52,8 +48,11 @@ public class FilmDisplayActivity extends AppCompatActivity {
         try {
 
             JSONObject json = new JSONObject(intent.getStringExtra("json"));
+            if (!json.get("Poster").toString().equals("N/A")) {
+                Glide.with(this).load(json.get("Poster").toString())
+                        .placeholder(R.drawable.ic_launcher_background).into(imageViewFilmLayout);
+            }
 
-            Glide.with(this).load(json.get("Poster").toString()).into(imageViewFilmLayout);
 
             textFilmLayoutDirector.setText(json.get("Director").toString());
             textFilmLayoutCast.setText(json.get("Actors").toString());

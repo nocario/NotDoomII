@@ -10,7 +10,7 @@ import okhttp3.Response;
 
 public class OmdbApiSearch {
 
-    private static final String URL_S = "http://www.omdbapi.com/?apikey=KEY&s=TITLE&type=movie";
+    private static final String URL_S = "http://www.omdbapi.com/?apikey=KEY&s=TITLE&type=movie&page=PAGENUMBER";
     private static final String URL_T = "http://www.omdbapi.com/?apikey=KEY&i=TITLE&type=movie";
 
     private final String title;
@@ -32,9 +32,10 @@ public class OmdbApiSearch {
         }
     }
 
-    public JSONArray getMovies() throws JSONException {
+    public JSONArray getMovies(int page) throws JSONException {
         String request = URL_S.replaceAll("TITLE", title);
         request = request.replaceAll("KEY", apiKey);
+        request = request.replaceAll("PAGENUMBER", String.valueOf(page));
 
         JSONObject jsonFilm = httpGetRequest(request);
 
