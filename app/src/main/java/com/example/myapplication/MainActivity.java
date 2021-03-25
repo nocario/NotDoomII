@@ -38,7 +38,6 @@ import java.util.concurrent.Executors;
 
 import okhttp3.Request;
 
-
 public class MainActivity extends AppCompatActivity implements RecyclerViewClickInterface{
 
     LinearLayout l;
@@ -50,9 +49,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.search_film);
-
-        l = new LinearLayout(this);
-        l.setOrientation(LinearLayout.VERTICAL);
 
         ImageButton btn = findViewById(R.id.searchButton);
 
