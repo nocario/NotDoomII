@@ -39,8 +39,12 @@ public class OmdbApiSearch {
 
         JSONObject jsonFilm = httpGetRequest(request);
 
-        return jsonFilm.getJSONArray("Search");
-
+        if (jsonFilm == null || jsonFilm.get("Response").toString().equals("False")) {
+            return null;
+        }
+        else {
+            return jsonFilm.getJSONArray("Search");
+        }
     }
 
     public JSONObject getMovie() {

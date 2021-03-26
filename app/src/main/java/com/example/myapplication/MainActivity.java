@@ -13,6 +13,7 @@ import android.util.Log;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.example.myapplication.OmdbApi.OmdbApiSearch;
 
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends AppCompatActivity implements RecyclerViewClickInterface{
+public class MainActivity extends AppCompatActivity implements RecyclerViewClickInterface {
 
     RecyclerView recyclerView;
     private ArrayList<MovieData> movieData;
@@ -103,16 +104,20 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewClick
                 try {
                     JSONArray listJson = o.getMovies(page);
 
-                    for (int i = 0; i<listJson.length(); i++) {
-                        movieData.add(new MovieData((JSONObject) listJson.get(i)));
+                    if (listJson != null) {
+                        for (int i = 0; i<listJson.length(); i++) {
+                            movieData.add(new MovieData((JSONObject) listJson.get(i)));
+                        }
                     }
-
                     //adapter = new MovieAdapter(MainActivity.this, movieData, MainActivity.this);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            adapter.notifyDataSetChanged();
+                            if (listJson == null) {
+                                Toast.makeText(MainActivity.this, "no movie found", Toast.LENGTH_LONG).show();
+                            }
 
+                            adapter.notifyDataSetChanged();
                             p.hide();
                             p.cancel();
                         }
